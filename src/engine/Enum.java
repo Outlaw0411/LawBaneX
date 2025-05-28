@@ -2855,7 +2855,8 @@ public class Enum {
         GuardWallArcher(null, false, true, false, false, false),
         Wanderer(null, false, true, true, false, false),
         HamletGuard(null, false, true, false, false, false),
-        AggroWanderer(null, false, false, true, false, false);
+        AggroWanderer(null, false, false, true, false, false),
+        COMPANION(null, false, true, true, false, false);
 
         private static HashMap<Integer, MobBehaviourType> _behaviourTypes = new HashMap<>();
         public MobBehaviourType BehaviourHelperType;
@@ -2881,5 +2882,13 @@ public class Enum {
         PET,
         CHARMED,
         GUARD;
+    }
+
+    public enum CompanionType{
+        HEALER,
+        TANK,
+        MELEE,
+        CASTER,
+        RANGED
     }
 }

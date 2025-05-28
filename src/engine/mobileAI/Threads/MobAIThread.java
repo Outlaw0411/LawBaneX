@@ -1,5 +1,6 @@
 package engine.mobileAI.Threads;
 
+import engine.gameManager.CompanionManager;
 import engine.gameManager.ConfigManager;
 import engine.mobileAI.MobAI;
 import engine.gameManager.ZoneManager;
@@ -27,6 +28,7 @@ public class MobAIThread implements Runnable{
         AI_CAST_FREQUENCY = Float.parseFloat(ConfigManager.MB_AI_CAST_FREQUENCY.getValue());
         AI_BASE_AGGRO_RANGE = (int)(60 * Float.parseFloat(ConfigManager.MB_AI_AGGRO_RANGE.getValue()));
         while (true) {
+            CompanionManager.pulse_companions();
             for (Zone zone : ZoneManager.getAllZones()) {
 
                 for (Mob mob : zone.zoneMobSet) {

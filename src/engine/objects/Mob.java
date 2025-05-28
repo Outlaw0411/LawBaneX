@@ -101,6 +101,8 @@ public class Mob extends AbstractIntelligenceAgent {
     private DateTime upgradeDateTime = null;
     private boolean lootSync = false;
 
+    public CompanionType companionType = null;
+
 
     /**
      * No Id Constructor
@@ -589,6 +591,39 @@ public class Mob extends AbstractIntelligenceAgent {
         mob.level = level;
         mob.healthMax = mob.getMobBase().getHealthMax() * (mob.level * 0.5f);
         mob.health.set(mob.healthMax);
+        return mob;
+    }
+
+    public static Mob createCompanion(int loadID, Guild guild, Zone parent, PlayerCharacter owner, short level) {
+        MobBase mobBase = MobBase.getMobBase(loadID);
+        Mob mob = null;
+
+        if (mobBase == null || owner == null)
+            return null;
+
+        createLock.writeLock().lock();
+        level += 20;
+
+        try {
+            mob = new Mob(mobBase, guild, parent, level, owner, 0);
+            if (mob.mobBase == null)
+                return null;
+            mob.runAfterLoad();
+            Vector3fImmutable loc = owner.getLoc();
+            DbManager.addToCache(mob);
+            mob.setPet(owner, true);
+            mob.setWalkMode(false);
+
+        } catch (Exception e) {
+            Logger.error(e);
+        } finally {
+            createLock.writeLock().unlock();
+        }
+        parent.zoneMobSet.add(mob);
+        mob.level = level;
+        mob.healthMax = mob.getMobBase().getHealthMax() * (mob.level * 0.5f);
+        mob.health.set(mob.healthMax);
+        mob.BehaviourType = MobBehaviourType.COMPANION;
         return mob;
     }
 
