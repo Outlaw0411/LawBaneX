@@ -14,6 +14,8 @@ import engine.server.MBServerStatics;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import static engine.Enum.CompanionType.*;
+
 public class CompanionManager {
 
     public static ArrayList<Mob> allCompanions = new ArrayList<>();
@@ -45,7 +47,10 @@ public class CompanionManager {
                     companion.equipmentSetID = 7203;
                     break;
             }
+            companion.runAfterLoad();
             InterestManager.forceLoad(companion);
+            WorldGrid.updateObject(companion);
+            InterestManager.reloadCharacter(companion);
         }
     }
 
@@ -67,16 +72,16 @@ public class CompanionManager {
             vd.getOptions().add(ranged);
             break;
             case 999: // healer
-                HireCompanion(pc,2006, Enum.CompanionType.HEALER);
+                HireCompanion(pc,2006, HEALER);
                 break;
             case 998: // tank
-                HireCompanion(pc,2010, Enum.CompanionType.TANK);
+                HireCompanion(pc,2010, TANK);
                 break;
             case 997: //melee
                 HireCompanion(pc,2017, Enum.CompanionType.MELEE);
                 break;
             case 996: // caster
-                HireCompanion(pc,2009, Enum.CompanionType.CASTER);
+                HireCompanion(pc,2009, CASTER);
                 break;
             case 995: // ranged
                 HireCompanion(pc,2002, Enum.CompanionType.RANGED);
@@ -97,6 +102,32 @@ public class CompanionManager {
         allCompanions.removeAll(toRemove);
 
         for(Mob companion : allCompanions){
+
+            if(!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER))
+                companion.combatTarget = companion.getOwner().combatTarget;
+
+            if(companion.combatTarget == null) {
+                if (companion.loc.distanceSquared2D(companion.getOwner().loc) > (32f * 32f)) {
+                    if (companion.loc.distanceSquared2D(companion.getOwner().loc) > (500f * 500f)) {
+                        companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 12f));
+                    } else {
+                        if (!companion.isMoving())
+                            MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 12f), false);
+                    }
+                }
+            }else{
+                if (companion.companionType.equals(CASTER)) {
+                    if(!CombatUtilities.inRange2D(companion,companion.combatTarget, 30f)){
+                        Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc,29f);
+                        MovementUtilities.aiMove(companion, location, false);
+                    }
+                }else if (companion.companionType.equals(RANGED)) {
+                    Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc,companion.getRange() - 1);
+                    MovementUtilities.aiMove(companion, location, false);
+                }else{
+
+                }
+            }
             switch(companion.companionType){
                 case HEALER:
                     pulseHealer(companion,companion.getOwner());
@@ -118,34 +149,17 @@ public class CompanionManager {
     }
 
     public static void pulseHealer(Mob mob, PlayerCharacter owner){
-        if(mob.loc.distanceSquared2D(owner.loc) > (32f*32f)){
-            if(mob.loc.distanceSquared2D(owner.loc) > 500f*500f){
-                mob.teleport(owner.loc);
-            }else {
-                MovementUtilities.aiMove(mob, owner.loc, false);
-            }
-        }else{
             if(mob.isMoving())
-                mob.stopMovement(mob.getMovementLoc());
-            if(owner.getHealth() < owner.healthMax){
-                if(System.currentTimeMillis() < mob.nextCastTime){
-                    PowersManager.useMobPower(mob,owner,PowersManager.getPowerByToken(429506720),40);
+                return;
+            if(owner.getHealth() < owner.healthMax) {
+                if (System.currentTimeMillis() < mob.nextCastTime) {
+                    PowersManager.useMobPower(mob, owner, PowersManager.getPowerByToken(429506720), 40);
                     mob.nextCastTime = System.currentTimeMillis() + 10000L;
                 }
             }
-        }
     }
     public static void pulseTank(Mob mob, PlayerCharacter owner){
-        if(mob.loc.distanceSquared2D(owner.loc) > (32f*32f)){
-            if(mob.loc.distanceSquared2D(owner.loc) > 500f*500f){
-                mob.teleport(owner.loc);
-            }else {
-                MovementUtilities.aiMove(mob, owner.loc, false);
-            }
-        }else {
-            if (mob.isMoving())
-                mob.stopMovement(mob.getMovementLoc());
-        }
+
         if(System.currentTimeMillis() < mob.nextCastTime){
             HashSet<AbstractWorldObject> mobs = WorldGrid.getObjectsInRangePartial(mob.loc,32f, MBServerStatics.MASK_MOB);
             for(AbstractWorldObject awo : mobs){
@@ -155,73 +169,22 @@ public class CompanionManager {
         }
     }
     public static void pulseMelee(Mob mob, PlayerCharacter owner){
-        if(mob.loc.distanceSquared2D(owner.loc) > (32f*32f)){
-            if(mob.loc.distanceSquared2D(owner.loc) > 500f*500f){
-                mob.teleport(owner.loc);
-            }else {
-                MovementUtilities.aiMove(mob, owner.loc, false);
-            }
-        }else {
-            if (mob.isMoving())
-                mob.stopMovement(mob.getMovementLoc());
-        }
 
-        if(owner.combatTarget != null){
-            mob.setCombatTarget(owner.combatTarget);
+        if (mob.isMoving())
+            return;
             if(CombatUtilities.inRangeToAttack(mob,owner.combatTarget)) {
                 MobAI.CheckForAttack(mob);
-            }else{
-                Vector3fImmutable location = owner.combatTarget.loc.moveTowards(mob.loc,mob.getRange() - 1);
-                MovementUtilities.aiMove(mob, location, false);
             }
-        }
     }
     public static void pulseCaster(Mob mob, PlayerCharacter owner){
-        if(mob.loc.distanceSquared2D(owner.loc) > (32f*32f)){
-            if(mob.loc.distanceSquared2D(owner.loc) > 500f*500f){
-                mob.teleport(owner.loc);
-            }else {
-                MovementUtilities.aiMove(mob, owner.loc, false);
-            }
-        }else {
-            if (mob.isMoving())
-                mob.stopMovement(mob.getMovementLoc());
-        }
-
-        if(owner.combatTarget != null){
-            mob.setCombatTarget(owner.combatTarget);
-            if(CombatUtilities.inRange2D(mob,owner.combatTarget,30)) {
-                MobAI.CheckForAttack(mob);
-            }else{
-                Vector3fImmutable location = owner.combatTarget.loc.moveTowards(mob.loc,29);
-                MovementUtilities.aiMove(mob, location, false);
-            }
-            if(System.currentTimeMillis() < mob.nextCastTime){
+            if(CombatUtilities.inRange2D(mob,owner.combatTarget,30) && System.currentTimeMillis() < mob.nextCastTime){
                 PowersManager.useMobPower(mob,owner,PowersManager.getPowerByToken(429757701),40);
                 mob.nextCastTime = System.currentTimeMillis() + 10000L;
             }
         }
-    }
     public static void pulseRanged(Mob mob, PlayerCharacter owner){
-        if(mob.loc.distanceSquared2D(owner.loc) > (32f*32f)){
-            if(mob.loc.distanceSquared2D(owner.loc) > 500f*500f){
-                mob.teleport(owner.loc);
-            }else {
-                MovementUtilities.aiMove(mob, owner.loc, false);
-            }
-        }else {
-            if (mob.isMoving())
-                mob.stopMovement(mob.getMovementLoc());
-        }
-
-        if(owner.combatTarget != null){
-            mob.setCombatTarget(owner.combatTarget);
             if(CombatUtilities.inRangeToAttack(mob,owner.combatTarget)) {
                 MobAI.CheckForAttack(mob);
-            }else{
-                Vector3fImmutable location = owner.combatTarget.loc.moveTowards(mob.loc,mob.getRange() - 1);
-                MovementUtilities.aiMove(mob, location, false);
             }
-        }
     }
 }
