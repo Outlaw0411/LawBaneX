@@ -47,7 +47,11 @@ public class CompanionManager {
                     companion.equipmentSetID = 7203;
                     break;
             }
-            companion.runAfterLoad();
+            try {
+                companion.runAfterLoad();
+            }catch(Exception ignored){
+
+            }
             InterestManager.forceLoad(companion);
             WorldGrid.updateObject(companion);
             InterestManager.reloadCharacter(companion);
