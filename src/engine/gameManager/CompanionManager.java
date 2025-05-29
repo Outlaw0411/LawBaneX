@@ -52,8 +52,6 @@ public class CompanionManager {
             }catch(Exception ignored){
 
             }
-            InterestManager.forceLoad(companion);
-            WorldGrid.updateObject(companion);
             InterestManager.reloadCharacter(companion);
         }
     }
@@ -107,16 +105,18 @@ public class CompanionManager {
 
         for(Mob companion : allCompanions){
 
+            companion.setBindLoc(companion.getOwner().loc.x,companion.getOwner().loc.y,companion.getOwner().loc.z);
+
             if(!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER))
                 companion.combatTarget = companion.getOwner().combatTarget;
 
             if(companion.combatTarget == null) {
-                if (companion.loc.distanceSquared2D(companion.getOwner().loc) > (32f * 32f)) {
+                if (companion.loc.distanceSquared2D(companion.getOwner().loc) > (12f * 12f)) {
                     if (companion.loc.distanceSquared2D(companion.getOwner().loc) > (500f * 500f)) {
-                        companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 12f));
+                        companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 10f));
                     } else {
                         if (!companion.isMoving())
-                            MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 12f), false);
+                            MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 10f), false);
                     }
                 }
             }else{
