@@ -39,7 +39,7 @@ public class MobAIThread implements Runnable{
                 for (Mob mob : zone.zoneMobSet) {
 
                     try {
-                        if (mob != null)
+                        if (mob != null && mob.companionType == null)
                             MobAI.DetermineAction(mob);
                     } catch (Exception e) {
                         Logger.error("Mob: " + mob.getName() + " UUID: " + mob.getObjectUUID() + " ERROR: " + e);
