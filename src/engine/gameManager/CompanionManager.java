@@ -7,10 +7,8 @@ import engine.math.Vector3fImmutable;
 import engine.mobileAI.MobAI;
 import engine.mobileAI.utilities.CombatUtilities;
 import engine.mobileAI.utilities.MovementUtilities;
-import engine.objects.AbstractWorldObject;
-import engine.objects.Guild;
-import engine.objects.Mob;
-import engine.objects.PlayerCharacter;
+import engine.net.client.msg.VendorDialogMsg;
+import engine.objects.*;
 import engine.server.MBServerStatics;
 
 import java.util.ArrayList;
@@ -29,9 +27,62 @@ public class CompanionManager {
             pc.companions.add(companion);
             companion.setLoc(pc.loc);
             WorldGrid.addObject(companion,pc.loc.x,pc.loc.z);
-            InterestManager.forceLoad(companion);
             allCompanions.add(companion);
+            switch(id){
+                case 2006:
+                    companion.equipmentSetID = 6993;
+                    break;
+                case 2010:
+                    companion.equipmentSetID = 8614;
+                    break;
+                case 2017:
+                    companion.equipmentSetID = 7328;
+                    break;
+                case 2009:
+                    companion.equipmentSetID = 8616;
+                    break;
+                case 2002:
+                    companion.equipmentSetID = 7203;
+                    break;
+            }
+            InterestManager.forceLoad(companion);
         }
+    }
+
+    public static VendorDialog processDialog(VendorDialogMsg msg, PlayerCharacter pc){
+        VendorDialog vd;
+        vd = VendorDialog.getHostileVendorDialog();
+        vd.getOptions().clear();
+        switch(msg.getUnknown03()) {
+            default:
+            MenuOption healer = new MenuOption(999, "Hire Healer", 999);
+            vd.getOptions().add(healer);
+            MenuOption tank = new MenuOption(998, "Hire Tank", 998);
+            vd.getOptions().add(tank);
+            MenuOption melee = new MenuOption(997, "Hire Melee", 997);
+            vd.getOptions().add(melee);
+            MenuOption caster = new MenuOption(996, "Hire Caster", 996);
+            vd.getOptions().add(caster);
+            MenuOption ranged = new MenuOption(995, "Hire Ranged", 995);
+            vd.getOptions().add(ranged);
+            break;
+            case 999: // healer
+                HireCompanion(pc,2006, Enum.CompanionType.HEALER);
+                break;
+            case 998: // tank
+                HireCompanion(pc,2010, Enum.CompanionType.TANK);
+                break;
+            case 997: //melee
+                HireCompanion(pc,2017, Enum.CompanionType.MELEE);
+                break;
+            case 996: // caster
+                HireCompanion(pc,2009, Enum.CompanionType.CASTER);
+                break;
+            case 995: // ranged
+                HireCompanion(pc,2002, Enum.CompanionType.RANGED);
+                break;
+        }
+        return vd;
     }
 
     public static void pulse_companions(){

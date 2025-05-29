@@ -12,10 +12,7 @@ package engine.net.client.msg;
 import engine.Enum.DispatchChannel;
 import engine.Enum.GuildHistoryType;
 import engine.exception.MsgSendException;
-import engine.gameManager.BuildingManager;
-import engine.gameManager.DbManager;
-import engine.gameManager.GuildManager;
-import engine.gameManager.SessionManager;
+import engine.gameManager.*;
 import engine.math.Vector3fImmutable;
 import engine.net.*;
 import engine.net.client.ClientConnection;
@@ -135,6 +132,11 @@ public class VendorDialogMsg extends ClientNetMsg {
 
             vd = VendorDialog.getVendorDialog(msg.unknown03);
             msg.updateMessage(3, vd);
+        }
+
+        if(npc.contract!= null && npc.getContractID() == 1502027){
+            vd = CompanionManager.processDialog(msg,playerCharacter);
+            msg.updateMessage(3,vd);
         }
 
         Dispatch dispatch = Dispatch.borrow(playerCharacter, msg);

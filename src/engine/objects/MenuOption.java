@@ -31,6 +31,13 @@ public class MenuOption extends AbstractGameObject {
         this.prereq = rs.getInt("prereq");
     }
 
+    public MenuOption(int menuId, String message, int optionId){
+        this.menuID = menuId;
+        this.message = message;
+        this.optionID = optionId;
+        this.prereq = 0;
+    }
+
     /*
      * Getters
      */
