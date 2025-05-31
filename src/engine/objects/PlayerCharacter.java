@@ -1927,6 +1927,15 @@ public class PlayerCharacter extends AbstractCharacter {
     private void killCleanup() {
         this.stopMovement(this.getLoc());
 
+        try{
+            for(Mob companion : this.companions){
+                companion.setOwner(null);
+                companion.killCharacter("Owner Died");
+            }
+            this.companions.clear();
+        }catch(Exception ignored){
+
+        }
         this.health.set(-1);
         //remove pet
         if (this.pet != null)

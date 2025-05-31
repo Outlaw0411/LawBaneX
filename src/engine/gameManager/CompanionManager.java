@@ -7,6 +7,7 @@ import engine.math.Vector3fImmutable;
 import engine.mobileAI.MobAI;
 import engine.mobileAI.utilities.CombatUtilities;
 import engine.mobileAI.utilities.MovementUtilities;
+import engine.net.client.msg.ErrorPopupMsg;
 import engine.net.client.msg.VendorDialogMsg;
 import engine.objects.*;
 import engine.server.MBServerStatics;
@@ -21,6 +22,12 @@ public class CompanionManager {
     public static ArrayList<Mob> allCompanions = new ArrayList<>();
 
     public static void HireCompanion(PlayerCharacter pc, int id, Enum.CompanionType type){
+
+        if(pc.companions.size() >= 3) {
+            ErrorPopupMsg.sendErrorMsg(pc, "You already have 3 companions.");
+            return;
+        }
+
         Guild guild = pc.guild;
         Mob companion = Mob.createCompanion(id,guild,ZoneManager.getSeaFloor(),pc,pc.level);
         if(companion != null){
@@ -98,7 +105,11 @@ public class CompanionManager {
             for (Mob companion : allCompanions) {
                 if (!companion.isAlive() || companion.getOwner() == null) {
                     toRemove.add(companion);
-                    companion.getOwner().companions.remove(companion);
+                    if(companion.getOwner() != null && companion.getOwner().companions == null){
+                        companion.getOwner().companions = new ArrayList<>();
+                    }
+                    if(companion.getOwner() != null)
+                        companion.getOwner().companions.remove(companion);
                     WorldGrid.removeObject(companion);
                 }
             }
@@ -109,10 +120,11 @@ public class CompanionManager {
         }
         for(Mob companion : allCompanions) {
             try {
-                companion.setBindLoc(companion.getOwner().loc.x, companion.getOwner().loc.y, companion.getOwner().loc.z);
+                companion.updateLocation();
 
-                if (companion.isMoving())
-                    companion.updateLocation();
+                PlayerCharacter owner = companion.getOwner();
+
+                companion.setBindLoc(companion.getOwner().loc.x, companion.getOwner().loc.y, companion.getOwner().loc.z);
 
                 if (!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER))
                     companion.combatTarget = companion.getOwner().combatTarget;
@@ -190,8 +202,8 @@ public class CompanionManager {
             }
     }
     public static void pulseCaster(Mob mob, PlayerCharacter owner){
-            if(CombatUtilities.inRange2D(mob,owner.combatTarget,30) && System.currentTimeMillis() < mob.nextCastTime){
-                PowersManager.useMobPower(mob,owner,PowersManager.getPowerByToken(429757701),40);
+            if(CombatUtilities.inRange2D(mob,owner.combatTarget,30) && System.currentTimeMillis() > mob.nextCastTime){
+                PowersManager.applyPower(mob,owner.combatTarget,owner.combatTarget.loc,429757701,40,false);
                 mob.nextCastTime = System.currentTimeMillis() + 10000L;
             }
         }
