@@ -95,9 +95,10 @@ public class CompanionManager {
     public static void pulse_companions(){
         ArrayList<Mob> toRemove = new ArrayList<>();
         for(Mob companion : allCompanions) {
-            if (!companion.isAlive()) {
+            if (!companion.isAlive() || companion.getOwner() == null) {
                 toRemove.add(companion);
                 companion.getOwner().companions.remove(companion);
+                WorldGrid.removeObject(companion);
             }
         }
 
@@ -107,12 +108,15 @@ public class CompanionManager {
 
             companion.setBindLoc(companion.getOwner().loc.x,companion.getOwner().loc.y,companion.getOwner().loc.z);
 
+            if(companion.isMoving())
+                companion.updateLocation();
+
             if(!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER))
                 companion.combatTarget = companion.getOwner().combatTarget;
 
             if(companion.combatTarget == null) {
-                if (companion.loc.distance2D(companion.getOwner().loc) > 8) {
-                    if (companion.loc.distance2D(companion.getOwner().loc) > 500f) {
+                if (companion.loc.distance2D(companion.getOwner().loc) > 10f) {
+                    if (companion.loc.distance2D(companion.getOwner().loc) > MBServerStatics.CHARACTER_LOAD_RANGE) {
                         companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f));
                     } else {
                         MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f), false);
@@ -152,9 +156,11 @@ public class CompanionManager {
     public static void pulseHealer(Mob mob, PlayerCharacter owner){
             if(mob.isMoving())
                 return;
+
             if(owner.getHealth() < owner.healthMax) {
-                if (System.currentTimeMillis() < mob.nextCastTime) {
-                    PowersManager.useMobPower(mob, owner, PowersManager.getPowerByToken(429506720), 40);
+                if (System.currentTimeMillis() > mob.nextCastTime) {
+                    //PowersManager.useMobPower(mob, owner, PowersManager.getPowerByToken(429506720), 40);
+                    PowersManager.applyPower(mob,owner,owner.loc,429506720,40,false );
                     mob.nextCastTime = System.currentTimeMillis() + 10000L;
                 }
             }
