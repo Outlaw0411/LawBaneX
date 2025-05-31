@@ -111,12 +111,11 @@ public class CompanionManager {
                 companion.combatTarget = companion.getOwner().combatTarget;
 
             if(companion.combatTarget == null) {
-                if (companion.loc.distanceSquared2D(companion.getOwner().loc) > (12f * 12f)) {
-                    if (companion.loc.distanceSquared2D(companion.getOwner().loc) > (500f * 500f)) {
-                        companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 10f));
+                if (companion.loc.distance2D(companion.getOwner().loc) > 8) {
+                    if (companion.loc.distance2D(companion.getOwner().loc) > 500f) {
+                        companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f));
                     } else {
-                        if (!companion.isMoving())
-                            MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 10f), false);
+                        MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f), false);
                     }
                 }
             }else{
@@ -125,11 +124,9 @@ public class CompanionManager {
                         Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc,29f);
                         MovementUtilities.aiMove(companion, location, false);
                     }
-                }else if (companion.companionType.equals(RANGED)) {
+                }else {
                     Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc,companion.getRange() - 1);
                     MovementUtilities.aiMove(companion, location, false);
-                }else{
-
                 }
             }
             switch(companion.companionType){
