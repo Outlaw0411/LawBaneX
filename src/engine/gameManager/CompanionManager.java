@@ -93,62 +93,68 @@ public class CompanionManager {
     }
 
     public static void pulse_companions(){
-        ArrayList<Mob> toRemove = new ArrayList<>();
-        for(Mob companion : allCompanions) {
-            if (!companion.isAlive() || companion.getOwner() == null) {
-                toRemove.add(companion);
-                companion.getOwner().companions.remove(companion);
-                WorldGrid.removeObject(companion);
-            }
-        }
-
-        allCompanions.removeAll(toRemove);
-
-        for(Mob companion : allCompanions){
-
-            companion.setBindLoc(companion.getOwner().loc.x,companion.getOwner().loc.y,companion.getOwner().loc.z);
-
-            if(companion.isMoving())
-                companion.updateLocation();
-
-            if(!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER))
-                companion.combatTarget = companion.getOwner().combatTarget;
-
-            if(companion.combatTarget == null) {
-                if (companion.loc.distance2D(companion.getOwner().loc) > 10f) {
-                    if (companion.loc.distance2D(companion.getOwner().loc) > MBServerStatics.CHARACTER_LOAD_RANGE) {
-                        companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f));
-                    } else {
-                        MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f), false);
-                    }
+        try {
+            ArrayList<Mob> toRemove = new ArrayList<>();
+            for (Mob companion : allCompanions) {
+                if (!companion.isAlive() || companion.getOwner() == null) {
+                    toRemove.add(companion);
+                    companion.getOwner().companions.remove(companion);
+                    WorldGrid.removeObject(companion);
                 }
-            }else{
-                if (companion.companionType.equals(CASTER)) {
-                    if(!CombatUtilities.inRange2D(companion,companion.combatTarget, 30f)){
-                        Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc,29f);
+            }
+
+            allCompanions.removeAll(toRemove);
+        }catch(Exception ignored){
+
+        }
+        for(Mob companion : allCompanions) {
+            try {
+                companion.setBindLoc(companion.getOwner().loc.x, companion.getOwner().loc.y, companion.getOwner().loc.z);
+
+                if (companion.isMoving())
+                    companion.updateLocation();
+
+                if (!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER))
+                    companion.combatTarget = companion.getOwner().combatTarget;
+
+                if (companion.combatTarget == null) {
+                    if (companion.loc.distance2D(companion.getOwner().loc) > 10f) {
+                        if (companion.loc.distance2D(companion.getOwner().loc) > MBServerStatics.CHARACTER_LOAD_RANGE) {
+                            companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f));
+                        } else {
+                            MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f), false);
+                        }
+                    }
+                } else {
+                    if (companion.companionType.equals(CASTER)) {
+                        if (!CombatUtilities.inRange2D(companion, companion.combatTarget, 30f)) {
+                            Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc, 29f);
+                            MovementUtilities.aiMove(companion, location, false);
+                        }
+                    } else {
+                        Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc, companion.getRange() - 1);
                         MovementUtilities.aiMove(companion, location, false);
                     }
-                }else {
-                    Vector3fImmutable location = companion.combatTarget.loc.moveTowards(companion.loc,companion.getRange() - 1);
-                    MovementUtilities.aiMove(companion, location, false);
                 }
-            }
-            switch(companion.companionType){
-                case HEALER:
-                    pulseHealer(companion,companion.getOwner());
-                    break;
-                case TANK:
-                    pulseTank(companion,companion.getOwner());
-                    break;
-                case MELEE:
-                    pulseMelee(companion,companion.getOwner());
-                    break;
-                case CASTER:
-                    pulseCaster(companion,companion.getOwner());
-                    break;
-                case RANGED:
-                    pulseRanged(companion,companion.getOwner());
-                    break;
+                switch (companion.companionType) {
+                    case HEALER:
+                        pulseHealer(companion, companion.getOwner());
+                        break;
+                    case TANK:
+                        pulseTank(companion, companion.getOwner());
+                        break;
+                    case MELEE:
+                        pulseMelee(companion, companion.getOwner());
+                        break;
+                    case CASTER:
+                        pulseCaster(companion, companion.getOwner());
+                        break;
+                    case RANGED:
+                        pulseRanged(companion, companion.getOwner());
+                        break;
+                }
+            } catch (Exception ignored) {
+
             }
         }
     }
