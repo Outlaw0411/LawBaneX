@@ -130,6 +130,9 @@ public class CompanionManager {
 
                     if(companion.combatTarget == null && companion.getOwner().combatTarget != null)
                         companion.combatTarget = companion.getOwner().combatTarget;
+
+                    if(companion.getOwner().combatTarget != null && companion.combatTarget != null && !companion.combatTarget.equals(companion.getOwner().combatTarget))
+                        companion.combatTarget = companion.getOwner().combatTarget;
                 }
 
                 if (companion.combatTarget == null) {
@@ -195,26 +198,15 @@ public class CompanionManager {
         }
     }
     public static void pulseMelee(Mob mob, PlayerCharacter owner){
-
-        if (mob.isMoving())
-            return;
-
-        float range = mob.getRange();
-        float distance = mob.loc.distance2D(mob.combatTarget.loc);
-        if(range >= distance) {
-            switch (mob.combatTarget.getObjectType()) {
-                case PlayerCharacter:
-                    PlayerCharacter targetPlayer = (PlayerCharacter) mob.combatTarget;
-                    MobAI.AttackPlayer(mob, targetPlayer);
-                    break;
-                case Building:
-                    Building targetBuilding = (Building) mob.combatTarget;
-                    MobAI.AttackBuilding(mob, targetBuilding);
-                    break;
-                case Mob:
-                    Mob targetMob = (Mob) mob.combatTarget;
-                    MobAI.AttackMob(mob, targetMob);
-                    break;
+        if (System.currentTimeMillis() > mob.getLastAttackTime()) {
+            float range = mob.getRange();
+            float distance = mob.loc.distance2D(mob.combatTarget.loc);
+            if (range >= distance) {
+                int attackDelay = 3000;
+                if (mob.isSiege())
+                    attackDelay = 11000;
+                CombatUtilities.combatCycle(mob, mob.combatTarget, false, mob.getWeaponItemBase(false));
+                mob.setLastAttackTime(System.currentTimeMillis() + attackDelay);
             }
         }else {
             MovementUtilities.aiMove(mob, mob.combatTarget.loc.moveTowards(mob.loc, mob.getRange() - 2), false);
