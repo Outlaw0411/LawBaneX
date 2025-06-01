@@ -6,7 +6,9 @@ import engine.InterestManagement.WorldGrid;
 import engine.math.Vector3fImmutable;
 import engine.mobileAI.utilities.CombatUtilities;
 import engine.mobileAI.utilities.MovementUtilities;
+import engine.net.DispatchMessage;
 import engine.net.client.msg.ErrorPopupMsg;
+import engine.net.client.msg.UpdateStateMsg;
 import engine.net.client.msg.VendorDialogMsg;
 import engine.objects.*;
 import engine.server.MBServerStatics;
@@ -39,18 +41,23 @@ public class CompanionManager {
             switch(id){
                 case 2006:
                     companion.equipmentSetID = 6993;
+                    companion.setFirstName("Healer Companion");
                     break;
                 case 2010:
                     companion.equipmentSetID = 8614;
+                    companion.setFirstName("Tank Companion");
                     break;
                 case 2017:
                     companion.equipmentSetID = 7328;
+                    companion.setFirstName("Melee Companion");
                     break;
                 case 2009:
                     companion.equipmentSetID = 8616;
+                    companion.setFirstName("Caster Companion");
                     break;
                 case 2002:
                     companion.equipmentSetID = 7203;
+                    companion.setFirstName("Ranged Companion");
                     break;
             }
             try {
@@ -132,12 +139,36 @@ public class CompanionManager {
 
                     if(companion.getOwner().combatTarget != null && companion.combatTarget != null && !companion.combatTarget.equals(companion.getOwner().combatTarget))
                         companion.combatTarget = companion.getOwner().combatTarget;
+
+                    if(companion.combatTarget != null){
+                        if(!companion.isCombat()) {
+                            companion.setCombat(true);
+                            UpdateStateMsg rwss = new UpdateStateMsg();
+                            rwss.setPlayer(companion);
+
+                            DispatchMessage.dispatchMsgToInterestArea(companion, rwss, Enum.DispatchChannel.PRIMARY, MBServerStatics.CHARACTER_LOAD_RANGE, true, false);
+                        }
+                    }else{
+                        if(companion.isCombat()) {
+                            companion.setCombat(false);
+                            UpdateStateMsg rwss = new UpdateStateMsg();
+                            rwss.setPlayer(companion);
+
+                            DispatchMessage.dispatchMsgToInterestArea(companion, rwss, Enum.DispatchChannel.PRIMARY, MBServerStatics.CHARACTER_LOAD_RANGE, true, false);
+                        }
+                    }
+                }
+
+                if (companion.loc.distance2D(companion.getOwner().loc) > MBServerStatics.CHARACTER_LOAD_RANGE) {
+                    companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f));
+                    companion.setCombatTarget(null);
                 }
 
                 if (companion.combatTarget == null) {
                     if (companion.loc.distance2D(companion.getOwner().loc) > 10f) {
                         if (companion.loc.distance2D(companion.getOwner().loc) > MBServerStatics.CHARACTER_LOAD_RANGE) {
                             companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f));
+                            companion.setCombatTarget(null);
                         } else {
                             MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f), false);
                         }
@@ -202,8 +233,7 @@ public class CompanionManager {
             float distance = mob.loc.distance2D(mob.combatTarget.loc);
             if (range >= distance) {
                 int attackDelay = 3000;
-                if (mob.isSiege())
-                    attackDelay = 11000;
+                CombatUtilities.combatCycle(mob, mob.combatTarget, true, mob.getWeaponItemBase(true));
                 CombatUtilities.combatCycle(mob, mob.combatTarget, false, mob.getWeaponItemBase(false));
                 mob.setLastAttackTime(System.currentTimeMillis() + attackDelay);
             }
