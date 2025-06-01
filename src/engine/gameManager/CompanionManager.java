@@ -4,7 +4,6 @@ import engine.Enum;
 import engine.InterestManagement.InterestManager;
 import engine.InterestManagement.WorldGrid;
 import engine.math.Vector3fImmutable;
-import engine.mobileAI.MobAI;
 import engine.mobileAI.utilities.CombatUtilities;
 import engine.mobileAI.utilities.MovementUtilities;
 import engine.net.client.msg.ErrorPopupMsg;
@@ -163,7 +162,7 @@ public class CompanionManager {
                         break;
                     case MELEE:
                     case RANGED:
-                        pulseMelee(companion, companion.getOwner());
+                        pulseAttack(companion, companion.getOwner());
                         break;
                     case CASTER:
                         pulseCaster(companion, companion.getOwner());
@@ -197,7 +196,7 @@ public class CompanionManager {
             mob.nextCastTime = System.currentTimeMillis() + 10000L;
         }
     }
-    public static void pulseMelee(Mob mob, PlayerCharacter owner){
+    public static void pulseAttack(Mob mob, PlayerCharacter owner){
         if (System.currentTimeMillis() > mob.getLastAttackTime()) {
             float range = mob.getRange();
             float distance = mob.loc.distance2D(mob.combatTarget.loc);
@@ -218,9 +217,4 @@ public class CompanionManager {
                 mob.nextCastTime = System.currentTimeMillis() + 10000L;
             }
         }
-    public static void pulseRanged(Mob mob, PlayerCharacter owner){
-            if(CombatUtilities.inRangeToAttack(mob,mob.combatTarget)) {
-                MobAI.CheckForAttack(mob);
-            }
-    }
 }
