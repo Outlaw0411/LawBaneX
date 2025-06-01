@@ -122,12 +122,15 @@ public class CompanionManager {
             try {
                 companion.updateLocation();
 
-                PlayerCharacter owner = companion.getOwner();
-
                 companion.setBindLoc(companion.getOwner().loc.x, companion.getOwner().loc.y, companion.getOwner().loc.z);
 
-                if (!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER))
-                    companion.combatTarget = companion.getOwner().combatTarget;
+                if (!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER)){
+                    if(companion.combatTarget != null && !companion.combatTarget.isAlive())
+                        companion.setCombatTarget(null);
+
+                    if(companion.combatTarget == null && companion.getOwner().combatTarget != null)
+                        companion.combatTarget = companion.getOwner().combatTarget;
+                }
 
                 if (companion.combatTarget == null) {
                     if (companion.loc.distance2D(companion.getOwner().loc) > 10f) {
@@ -196,24 +199,26 @@ public class CompanionManager {
         if (mob.isMoving())
             return;
 
-            if(CombatUtilities.inRangeToAttack(mob,mob.combatTarget)) {
-                switch (mob.combatTarget.getObjectType()) {
-                    case PlayerCharacter:
-                        PlayerCharacter targetPlayer = (PlayerCharacter) mob.combatTarget;
-                        MobAI.AttackPlayer(mob, targetPlayer);
-                        break;
-                    case Building:
-                        Building targetBuilding = (Building) mob.combatTarget;
-                        MobAI.AttackBuilding(mob, targetBuilding);
-                        break;
-                    case Mob:
-                        Mob targetMob = (Mob) mob.combatTarget;
-                        MobAI.AttackMob(mob, targetMob);
-                        break;
-                }
-            }else{
-                MovementUtilities.aiMove(mob,mob.combatTarget.loc.moveTowards(mob.loc,mob.getRange() - 2), false);
+        float range = mob.getRange();
+        float distance = mob.loc.distance2D(mob.combatTarget.loc);
+        if(range >= distance) {
+            switch (mob.combatTarget.getObjectType()) {
+                case PlayerCharacter:
+                    PlayerCharacter targetPlayer = (PlayerCharacter) mob.combatTarget;
+                    MobAI.AttackPlayer(mob, targetPlayer);
+                    break;
+                case Building:
+                    Building targetBuilding = (Building) mob.combatTarget;
+                    MobAI.AttackBuilding(mob, targetBuilding);
+                    break;
+                case Mob:
+                    Mob targetMob = (Mob) mob.combatTarget;
+                    MobAI.AttackMob(mob, targetMob);
+                    break;
             }
+        }else {
+            MovementUtilities.aiMove(mob, mob.combatTarget.loc.moveTowards(mob.loc, mob.getRange() - 2), false);
+        }
     }
     public static void pulseCaster(Mob mob, PlayerCharacter owner){
             if(CombatUtilities.inRange2D(mob,owner.combatTarget,30) && System.currentTimeMillis() > mob.nextCastTime){
