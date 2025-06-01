@@ -156,13 +156,11 @@ public class CompanionManager {
                         pulseTank(companion, companion.getOwner());
                         break;
                     case MELEE:
+                    case RANGED:
                         pulseMelee(companion, companion.getOwner());
                         break;
                     case CASTER:
                         pulseCaster(companion, companion.getOwner());
-                        break;
-                    case RANGED:
-                        pulseRanged(companion, companion.getOwner());
                         break;
                 }
             } catch (Exception ignored) {
@@ -197,8 +195,24 @@ public class CompanionManager {
 
         if (mob.isMoving())
             return;
-            if(CombatUtilities.inRangeToAttack(mob,owner.combatTarget)) {
-                MobAI.CheckForAttack(mob);
+
+            if(CombatUtilities.inRangeToAttack(mob,mob.combatTarget)) {
+                switch (mob.combatTarget.getObjectType()) {
+                    case PlayerCharacter:
+                        PlayerCharacter targetPlayer = (PlayerCharacter) mob.combatTarget;
+                        MobAI.AttackPlayer(mob, targetPlayer);
+                        break;
+                    case Building:
+                        Building targetBuilding = (Building) mob.combatTarget;
+                        MobAI.AttackBuilding(mob, targetBuilding);
+                        break;
+                    case Mob:
+                        Mob targetMob = (Mob) mob.combatTarget;
+                        MobAI.AttackMob(mob, targetMob);
+                        break;
+                }
+            }else{
+                MovementUtilities.aiMove(mob,mob.combatTarget.loc.moveTowards(mob.loc,mob.getRange() - 2), false);
             }
     }
     public static void pulseCaster(Mob mob, PlayerCharacter owner){
@@ -208,7 +222,7 @@ public class CompanionManager {
             }
         }
     public static void pulseRanged(Mob mob, PlayerCharacter owner){
-            if(CombatUtilities.inRangeToAttack(mob,owner.combatTarget)) {
+            if(CombatUtilities.inRangeToAttack(mob,mob.combatTarget)) {
                 MobAI.CheckForAttack(mob);
             }
     }
