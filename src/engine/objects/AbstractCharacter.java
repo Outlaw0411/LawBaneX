@@ -800,6 +800,7 @@ public abstract class AbstractCharacter extends AbstractWorldObject {
             this.setLoc(stopLoc);
             this.endLoc = Vector3fImmutable.ZERO;
             this.resetLastSetLocUpdate();
+            InterestManager.setObjectDirty(this);
         } catch (Exception e) {
             Logger.error(e);
         } finally {
