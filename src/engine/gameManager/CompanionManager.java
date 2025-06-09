@@ -66,6 +66,11 @@ public class CompanionManager {
 
             }
             InterestManager.reloadCharacter(companion);
+            WorldGrid.updateObject(companion);
+            HashSet<AbstractWorldObject> players = WorldGrid.getObjectsInRangePartial(companion.loc,MBServerStatics.CHARACTER_LOAD_RANGE, MBServerStatics.MASK_PLAYER);
+            for(AbstractWorldObject awo : players){
+                ((PlayerCharacter)awo).setDirtyLoad(true);
+            }
         }
     }
 
@@ -130,7 +135,7 @@ public class CompanionManager {
 
                 companion.setBindLoc(companion.getOwner().loc.x, companion.getOwner().loc.y, companion.getOwner().loc.z);
 
-                if (!companion.companionType.equals(TANK) && !companion.companionType.equals(HEALER)){
+                if (!companion.companionType.equals(HEALER)){
                     if(companion.combatTarget != null && !companion.combatTarget.isAlive())
                         companion.setCombatTarget(null);
 
@@ -169,6 +174,10 @@ public class CompanionManager {
                         if (companion.loc.distance2D(companion.getOwner().loc) > MBServerStatics.CHARACTER_LOAD_RANGE) {
                             companion.teleport(Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f));
                             companion.setCombatTarget(null);
+                            HashSet<AbstractWorldObject> players = WorldGrid.getObjectsInRangePartial(companion.loc,MBServerStatics.CHARACTER_LOAD_RANGE, MBServerStatics.MASK_PLAYER);
+                            for(AbstractWorldObject awo : players){
+                                ((PlayerCharacter)awo).setDirtyLoad(true);
+                            }
                         } else {
                             MovementUtilities.aiMove(companion, Vector3fImmutable.getRandomPointOnCircle(companion.getOwner().loc, 6f), false);
                         }
@@ -220,12 +229,13 @@ public class CompanionManager {
     public static void pulseTank(Mob mob, PlayerCharacter owner){
 
         if(System.currentTimeMillis() < mob.nextCastTime){
-            HashSet<AbstractWorldObject> mobs = WorldGrid.getObjectsInRangePartial(mob.loc,32f, MBServerStatics.MASK_MOB);
+            HashSet<AbstractWorldObject> mobs = WorldGrid.getObjectsInRangePartial(mob.loc,64f, MBServerStatics.MASK_MOB);
             for(AbstractWorldObject awo : mobs){
                 ((Mob)awo).setCombatTarget(mob);
             }
             mob.nextCastTime = System.currentTimeMillis() + 10000L;
         }
+        pulseAttack(mob,owner);
     }
     public static void pulseAttack(Mob mob, PlayerCharacter owner){
         if (System.currentTimeMillis() > mob.getLastAttackTime()) {
