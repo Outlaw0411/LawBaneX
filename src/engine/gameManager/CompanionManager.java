@@ -71,15 +71,17 @@ public class CompanionManager {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            InterestManager.reloadCharacter(companion);
+
+            //HashSet<AbstractWorldObject> players = WorldGrid.getObjectsInRangePartial(companion.loc,
+            //        MBServerStatics.CHARACTER_LOAD_RANGE, MBServerStatics.MASK_PLAYER);
+            //for (AbstractWorldObject awo : players) {
+            //    if (awo instanceof PlayerCharacter)
+            //        ((PlayerCharacter) awo).setDirtyLoad(true);
+            //}
+
+            InterestManager.forceLoad(companion);
             WorldGrid.updateObject(companion);
 
-            HashSet<AbstractWorldObject> players = WorldGrid.getObjectsInRangePartial(companion.loc,
-                    MBServerStatics.CHARACTER_LOAD_RANGE, MBServerStatics.MASK_PLAYER);
-            for (AbstractWorldObject awo : players) {
-                if (awo instanceof PlayerCharacter)
-                    ((PlayerCharacter) awo).setDirtyLoad(true);
-            }
         }
     }
 

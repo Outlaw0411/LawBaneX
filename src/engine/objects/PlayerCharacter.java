@@ -1931,6 +1931,7 @@ public class PlayerCharacter extends AbstractCharacter {
             for(Mob companion : this.companions){
                 companion.setOwner(null);
                 companion.killCharacter("Owner Died");
+                WorldGrid.removeObject(companion);
             }
             this.companions.clear();
         }catch(Exception ignored){
