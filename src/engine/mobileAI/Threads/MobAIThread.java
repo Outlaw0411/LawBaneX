@@ -33,7 +33,7 @@ public class MobAIThread implements Runnable{
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            CompanionManager.pulse_companions();
+            CompanionManager.pulseCompanions();
             for (Zone zone : ZoneManager.getAllZones()) {
 
                 for (Mob mob : zone.zoneMobSet) {

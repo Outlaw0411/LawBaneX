@@ -1253,6 +1253,14 @@ public class Mob extends AbstractIntelligenceAgent {
 
         this.stopMovement(this.getMovementLoc());
 
+        if(this.getOwner() != null){
+            try{
+                this.getOwner().companions.remove(this);
+            }catch(Exception ignored){
+
+            }
+        }
+
         if (attacker != null)
             if (attacker.getObjectType() == GameObjectType.PlayerCharacter) {
                 Group g = GroupManager.getGroup((PlayerCharacter) attacker);
