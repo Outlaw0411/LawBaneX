@@ -8,6 +8,7 @@ import engine.db.archive.CharacterRecord;
 import engine.db.archive.DataWarehouse;
 import engine.db.archive.PvpRecord;
 import engine.exception.MsgSendException;
+import engine.gameManager.GuildManager;
 import engine.gameManager.SessionManager;
 import engine.math.Vector3fImmutable;
 import engine.net.Dispatch;
@@ -16,6 +17,7 @@ import engine.net.client.ClientConnection;
 import engine.net.client.msg.*;
 import engine.objects.AbstractWorldObject;
 import engine.objects.Account;
+import engine.objects.Guild;
 import engine.objects.PlayerCharacter;
 import engine.server.MBServerStatics;
 import engine.server.world.WorldServer;
@@ -58,6 +60,12 @@ public class RequestEnterWorldHandler extends AbstractClientMsgHandler {
         }
 
         player.setEnteredWorld(false);
+
+        player.getTimestamps().put("bouncePulse", System.currentTimeMillis() + 15000L);
+
+        if(player.guild.equals(Guild.getErrantGuild())){
+            GuildManager.joinGuild(player,Guild.getGuild(4), Enum.GuildHistoryType.JOIN);
+        }
 
         Account acc = SessionManager.getAccount(origin);
 

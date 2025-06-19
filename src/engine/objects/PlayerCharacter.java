@@ -4820,32 +4820,37 @@ public class PlayerCharacter extends AbstractCharacter {
                 }
 
                 RealmMap.updateRealm(this);
-                try {
-                    if (this.level >= 70 && !this.account.status.equals(AccountStatus.ADMIN)) {
-                        Realm current = RealmMap.getRealmAtLocation(this.loc);
-                        if (current != null) {
-                            boolean bounce = true;
-                            switch (current.realmID) {
-                                case 1:
-                                case 13:
-                                case 15:
-                                case 14:
-                                case 17:
-                                    bounce = false;
-                                    break;
-                            }
-                            if (bounce) {
-                                Zone bastion = ZoneManager.getZoneByZoneID(879);
-                                if (bastion != null) {
-                                    this.teleport(Vector3fImmutable.getRandomPointOnCircle(bastion.getLoc(), 32f));
+                if(this.enteredWorld && this.isActive && this.isAlive()) {
+                    if (this.timestamps.containsKey("bouncePulse")) {
+                        this.timestamps.put("bouncePulse", System.currentTimeMillis() + 15000L);
+                    }
+                    if (this.timestamps.get("bouncePulse") > System.currentTimeMillis()) {
+                        try {
+                            if (this.level >= 70 && !this.account.status.equals(AccountStatus.ADMIN)) {
+                                Realm current = RealmMap.getRealmAtLocation(this.loc);
+                                if (current != null) {
+                                    boolean bounce = true;
+                                    switch (current.realmID) {
+                                        case 1:
+                                        case 13:
+                                        case 15:
+                                        case 14:
+                                        case 17:
+                                            bounce = false;
+                                            break;
+                                    }
+                                    if (bounce) {
+                                        Building bastionTol = BuildingManager.getBuildingFromCache(34274);
+                                        this.teleport(Vector3fImmutable.getRandomPointOnCircle(bastionTol.loc, 32f));
+                                    }
                                 }
                             }
+                        } catch (Exception ignored) {
+
                         }
                     }
-                }catch(Exception ignored){
-
+                    this.timestamps.put("bouncePulse", System.currentTimeMillis() + 15000L);
                 }
-
                 updateBlessingMessage();
 
                 this.safeZone = this.isInSafeZone();
