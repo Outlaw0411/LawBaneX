@@ -22,11 +22,15 @@ public class OutpostManager {
         for (AbstractGameObject ago : worldCities.values()) {
             City city = (City)ago;
             if(city.getIsNpcOwned() == 1 && city.getCityName().contains("Outpost")){
-                int rank = city.getRank();
-                Building tol = city.getTOL();
-                Guild owner = city.getGuild();
-                Mine mine = Mine.getMineFromTower(tol.getObjectUUID());
-                outposts.add(new Outpost(owner,tol,rank, mine));
+                try {
+                    int rank = city.getRank();
+                    Building tol = city.getTOL();
+                    Guild owner = city.getGuild();
+                    Mine mine = Mine.getMineFromTower(tol.getObjectUUID());
+                    outposts.add(new Outpost(owner, tol, rank, mine));
+                }catch(Exception ignored){
+
+                }
             }
         }
     }
