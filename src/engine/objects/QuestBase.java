@@ -12,6 +12,7 @@ public class QuestBase {
     public final int xp;
     public final int gold;
     public final int rewardID;
+    public final int refID;
 
     public QuestBase(ResultSet rs) throws SQLException {
         this.uid = rs.getInt("UID");
@@ -20,5 +21,6 @@ public class QuestBase {
         this.xp = rs.getInt("quest_xp");
         this.gold = rs.getInt("quest_gold");
         this.rewardID = rs.getInt("quest_reward_itemBaseID");
+        this.refID = rs.getInt("quest_ref_uid");
     }
 }

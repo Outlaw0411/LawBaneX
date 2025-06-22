@@ -177,6 +177,8 @@ public class PlayerCharacter extends AbstractCharacter {
 
     public ArrayList<Mob> companions = new ArrayList<>();
 
+    public QuestBase current_quest = null;
+
     /**
      * No Id Constructor
      */
@@ -4860,6 +4862,13 @@ public class PlayerCharacter extends AbstractCharacter {
             } finally {
                 this.updateLock.writeLock().unlock();
             }
+        }
+        try {
+            if (this.current_quest != null) {
+                QuestManager.check_completion(this.current_quest, this);
+            }
+        }catch(Exception ignored){
+
         }
     }
 
