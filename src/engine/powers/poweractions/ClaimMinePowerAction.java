@@ -10,11 +10,13 @@
 package engine.powers.poweractions;
 
 import engine.Enum;
+import engine.InterestManagement.WorldGrid;
 import engine.gameManager.ChatManager;
 import engine.math.Vector3fImmutable;
 import engine.objects.*;
 import engine.powers.ActionsBase;
 import engine.powers.PowersBase;
+import engine.util.ThreadUtils;
 import engine.workthreads.HourlyJobThread;
 
 import java.sql.ResultSet;
@@ -55,7 +57,10 @@ public class ClaimMinePowerAction extends AbstractPowerAction {
             ChatManager.sendSystemMessage((PlayerCharacter) source, "You successfully claimed this mine..");
 
         HourlyJobThread.mineWindowClose(mine);
+        ThreadUtils.sleep(1000);
         HourlyJobThread.mineWindowOpen(mine);
+        ThreadUtils.sleep(1000);
+        WorldGrid.updateObject(mineBuilding);
     }
 
     @Override
