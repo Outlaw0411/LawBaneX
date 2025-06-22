@@ -153,6 +153,29 @@ public class HourlyJobThread implements Runnable {
         mine.lastClaimer = null;
         mine.setActive(false);
         mine.wasClaimed = true;
+        try{
+            City city = ZoneManager.getCityAtLocation(mineBuilding.loc);
+            if(city != null){
+                int multiplier = 1;
+                if(city.getCityName().contains("R6")){
+                    multiplier = 6;
+                }else if(city.getCityName().contains("R5")){
+                    multiplier = 5;
+                }else if(city.getCityName().contains("R4")){
+                    multiplier = 4;
+                }else if(city.getCityName().contains("R3")){
+                    multiplier = 3;
+                }else if(city.getCityName().contains("R2")){
+                    multiplier = 2;
+                }else if(city.getCityName().contains("R1")){
+                    multiplier = 1;
+                }
+                mineBuilding.setMaxHitPoints(125000 * multiplier);
+                mineBuilding.setHealth(mineBuilding.healthMax);
+            }
+        }catch(Exception ignored){
+
+        }
         return true;
     }
 
