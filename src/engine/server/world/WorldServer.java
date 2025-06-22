@@ -354,6 +354,9 @@ public class WorldServer {
 		Logger.info("Loading Mob Powers");
 		PowersManager.AllMobPowers = DbManager.PowerQueries.LOAD_MOB_POWERS();
 
+		Logger.info("Loading Quest Base Data");
+		DbManager.QuestBaseQueries.LOAD_ALL_QUESTBASES();
+
 		Logger.info("Loading item enchants");
 		DbManager.LootQueries.LOAD_ENCHANT_VALUES();
 

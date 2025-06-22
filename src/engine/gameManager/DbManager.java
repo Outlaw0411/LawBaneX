@@ -79,6 +79,8 @@ public enum DbManager {
     public static Hasher hasher;
     private static HikariDataSource connectionPool = null;
 
+    public static final dbQuestBaseHandler QuestBaseQueries = new dbQuestBaseHandler();
+
     public static AbstractGameObject getObject(GameObjectType objectType, int objectUUID) {
 
         AbstractGameObject outObject = null;
