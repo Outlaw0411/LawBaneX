@@ -34,12 +34,4 @@ public class OutpostManager {
             }
         }
     }
-
-    public static void revertAll(){
-        for(Outpost outpost : outposts) {
-            outpost.tower.setOwner(NPC.getNPC(outpost.originalOwner.getGuildLeaderUUID()));
-            outpost.tower.setRank(outpost.rank);
-            outpost.mine.setActive(true);
-        }
-    }
 }

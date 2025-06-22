@@ -15,6 +15,7 @@ import engine.math.Vector3fImmutable;
 import engine.objects.*;
 import engine.powers.ActionsBase;
 import engine.powers.PowersBase;
+import engine.workthreads.HourlyJobThread;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,7 +54,8 @@ public class ClaimMinePowerAction extends AbstractPowerAction {
         if (mine.claimMine(playerCharacter) == true)
             ChatManager.sendSystemMessage((PlayerCharacter) source, "You successfully claimed this mine..");
 
-        mine.setActive(false);
+        HourlyJobThread.mineWindowClose(mine);
+        HourlyJobThread.mineWindowOpen(mine);
     }
 
     @Override

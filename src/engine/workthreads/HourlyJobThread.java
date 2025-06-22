@@ -80,34 +80,7 @@ public class HourlyJobThread implements Runnable {
             ArrayList<Mine> mines = Mine.getMines();
 
             for (Mine mine : mines) {
-                if (LocalDateTime.now().getHour() == 1400) {
-                    mine.wasClaimed = false;
-                }
-                try {
-
-                    // Open Errant Mines
-
-                    if (mine.getOwningGuild().isEmptyGuild()) {
-                        HourlyJobThread.mineWindowOpen(mine);
-                        continue;
-                    }
-
-                    // Open Mines owned by nations having their WOO
-                    // set to the current mine window.
-
-                    if (mine.getOwningGuild().getNation().getMineTime() ==
-                            LocalDateTime.now().getHour() && mine.wasClaimed == false) {
-                        HourlyJobThread.mineWindowOpen(mine);
-                        continue;
-                    }
-
-                    // Close the mine if it reaches this far
-
-                    mineWindowClose(mine);
-
-                } catch (Exception e) {
-                    Logger.error("mineID: " + mine.getObjectUUID(), e.toString());
-                }
+                HourlyJobThread.mineWindowOpen(mine);
             }
         } catch (Exception e) {
             Logger.error(e.toString());
@@ -180,6 +153,32 @@ public class HourlyJobThread implements Runnable {
         mine.lastClaimer = null;
         mine.setActive(false);
         mine.wasClaimed = true;
+        try{
+            City city = ZoneManager.getCityAtLocation(mineBuilding.loc);
+            if(city != null){
+                if(city.getCityName().contains("R6")){
+                    mineBuilding.setRank(6);
+                    WorldGrid.updateObject(mineBuilding);
+                }else if(city.getCityName().contains("R5")){
+                    mineBuilding.setRank(5);
+                    WorldGrid.updateObject(mineBuilding);
+                }else if(city.getCityName().contains("R4")){
+                    mineBuilding.setRank(4);
+                    WorldGrid.updateObject(mineBuilding);
+                }else if(city.getCityName().contains("R3")){
+                    mineBuilding.setRank(3);
+                    WorldGrid.updateObject(mineBuilding);
+                }else if(city.getCityName().contains("R2")){
+                    mineBuilding.setRank(2);
+                    WorldGrid.updateObject(mineBuilding);
+                }else if(city.getCityName().contains("R1")){
+                    mineBuilding.setRank(1);
+                    WorldGrid.updateObject(mineBuilding);
+                }
+            }
+        }catch(Exception ignored){
+
+        }
         return true;
     }
 
@@ -214,7 +213,7 @@ public class HourlyJobThread implements Runnable {
 
         // Open or Close mines for the current mine window.
 
-        processMineWindow();
+        //processMineWindow();
 
         // Deposit mine resources to Guilds
 
