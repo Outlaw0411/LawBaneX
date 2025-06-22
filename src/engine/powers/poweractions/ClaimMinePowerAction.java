@@ -52,6 +52,8 @@ public class ClaimMinePowerAction extends AbstractPowerAction {
 
         if (mine.claimMine(playerCharacter) == true)
             ChatManager.sendSystemMessage((PlayerCharacter) source, "You successfully claimed this mine..");
+
+        mine.setActive(false);
     }
 
     @Override
